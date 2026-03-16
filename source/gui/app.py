@@ -2,17 +2,24 @@
 import sys
 import pygame
 from .asset_manager import CardLoader
+from .board_view import BoardView
 
 class App:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((800, 600))
+        self.screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE | pygame.WINDOWMAXIMIZED)
         pygame.display.set_caption("FreeCell")
+
+        self.screen_width = self.screen.get_width()
+        self.screen_height = self.screen.get_height()
+
         self.clock = pygame.time.Clock()
         self.running = True
 
         loader = CardLoader()
         self.deck = loader.load_cards()
+
+        self.board_view = BoardView(self.deck)
 
     def run(self):
         while self.running:
@@ -20,15 +27,17 @@ class App:
                 if event.type == pygame.QUIT:
                     self.running = False
 
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.running = False
+
+                if event.type == pygame.VIDEORESIZE:
+                    self.screen_width = event.w
+                    self.screen_height = event.h
+
             self.screen.fill((0, 255, 0))
 
-            # Draw Cards
-
-            if ('A', 'hearts') in self.deck:
-                self.screen.blit(self.deck[('A', 'hearts')], (50, 50))
-
-            if ('J', 'hearts') in self.deck:
-                self.screen.blit(self.deck[('J', 'hearts')], (160, 50))
+            self.board_view.draw(self.screen, self.screen_width, self.screen_height)
 
             pygame.display.flip()
 
